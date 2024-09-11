@@ -1,0 +1,29 @@
+Server:
+  Port: 8999
+
+DB:
+  Host: "devops-lab-postgres"
+  User: "postgres"
+  Password: "example"
+  Port: 5432
+  DBName: "cerberus"
+
+APIs:
+  - Prefix: "/tasks"
+    Host: "http://localhost:9090/api/v1"
+    Routes: 
+      - Route: "/tasks"
+        Method: "GET"
+        Role: "USER"
+
+      - Route: "/tasks"
+        Method: "POST"
+        Role: "USER"
+
+      - Route: "/tasks"
+        Method: "DELETE"
+        Role: "USER"
+
+      - Route: "/tasks"
+        Method: "PUT"
+        Role: "USER"
