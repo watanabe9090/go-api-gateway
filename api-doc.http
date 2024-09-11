@@ -1,0 +1,57 @@
+### Vars
+@url = http://localhost:8999/api/v1
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJVU0VSIiwiZXhwIjoxNzI2MDc0Nzg0LCJpYXQiOjE3MjYwNzExODQsImlzcyI6ImZvcnRyZXNzIiwic3ViIjoiZm9vYmFyIn0._hw3T4BQX7HP8ggzsVnm-E3B6Fw4Gz8jom4gtW8w_hA
+
+
+### Request token
+POST {{url}}/auth/token
+Content-Type: application/json
+
+{
+    "username": "foobar",
+    "password": "barfoo"
+}
+
+### Invalidates the jwt token
+POST {{url}}/auth/invalidate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+
+### Forward
+GET {{url}}/tasks
+Authorization: Bearer {{token}}
+
+
+
+### Forward
+POST {{url}}/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjAxODcxNywiaWF0IjoxNzI2MDE1MTE3LCJpc3MiOiJmb3J0cmVzcyIsInN1YiI6Inl1cmkifQ.VKD1Imw51hNTluBb9uMqwBXrPdTdYJ36XYu2btaI-AQ
+Content-Type: application/json
+
+{
+    "name": "Task n1",
+    "content": "123"
+}
+
+### Forward
+PUT {{url}}/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjAxODcxNywiaWF0IjoxNzI2MDE1MTE3LCJpc3MiOiJmb3J0cmVzcyIsInN1YiI6Inl1cmkifQ.VKD1Imw51hNTluBb9uMqwBXrPdTdYJ36XYu2btaI-AQ
+Content-Type: application/json
+
+{
+    "id": 61,
+    "name": "Task n60",
+    "content": "123"
+}
+
+
+### Forward
+DELETE  {{url}}/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjAxODcxNywiaWF0IjoxNzI2MDE1MTE3LCJpc3MiOiJmb3J0cmVzcyIsInN1YiI6Inl1cmkifQ.VKD1Imw51hNTluBb9uMqwBXrPdTdYJ36XYu2btaI-AQ
+Content-Type: application/json
+
+{
+    "id": 61
+}
