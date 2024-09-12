@@ -147,108 +147,144 @@ func (h *AuthHandler) HandleInvalidateToken(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
-	requestedPrefix := strings.Replace(r.URL.Path, "/api/v1", "", 1)
-	log.Println(requestedPrefix)
+	requestedContext := strings.Replace(r.URL.Path, "/api/v1", "", 1)
+	log.Printf("request being forward to: %s\n", requestedContext)
 
 	// Find the right context in properties.yml
 	var route *internal.APIRoute
 	for _, value := range h.props.APIs {
-		if strings.Contains(requestedPrefix, value.Prefix) {
+		if strings.HasPrefix(requestedContext, value.Context) {
 			route = &value
 			break
 		}
 	}
 	if route == nil {
-		log.Printf("Cloud not found the route %s\n", requestedPrefix)
-		w.WriteHeader(http.StatusNotFound)
+		log.Printf("could not found the route %s\n", requestedContext)
+		internal.HttpReply(w, http.StatusNotFound, &internal.APIResponse{
+			Message: fmt.Sprintf("could not found the route %s\n", requestedContext),
+			Data:    nil,
+		})
 		return
 	}
 
 	// Find if the route exits for the right METHOD
-	var permission *internal.APIRoutePermission
+	var subRoute *internal.APIRoutePermission
 	for _, value := range route.Routes {
-		// ToDo: Apply startsWith insted of contains
 		if value.Method == r.Method &&
-			strings.Contains(requestedPrefix, value.Route) {
-			permission = &value
+			strings.HasPrefix(requestedContext, value.Route) {
+			subRoute = &value
 			break
 		}
 	}
-	if permission == nil {
-		log.Printf("Cloud not found the route for %s and method %s\n", requestedPrefix, r.Method)
-		w.WriteHeader(http.StatusNotFound)
+	if subRoute == nil {
+		log.Printf("could not found the route for %s and method %s\n", requestedContext, r.Method)
+		internal.HttpReply(w, http.StatusNotFound, &internal.APIResponse{
+			Message: fmt.Sprintf("could not found the route for %s and method %s\n", requestedContext, r.Method),
+			Data:    nil,
+		})
 		return
 	}
 
-	// Check the bearer tokenStr
-	tokenStr, err := internal.GetBearerToken(r)
-	if err != nil {
-		log.Println("Cloud not found the Bearer token in Headers")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	// Check fi the bearer token is active
-	tokens, err := h.tokenRepo.GetByToken(tokenStr)
-	if err != nil {
-		log.Printf("Cloud not found the Bearer token %s", tokenStr)
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	if len(tokens) == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
-	}
-	// token := tokenStr[0]
-	fmt.Println(tokenStr[0])
-
-	claims, err := internal.ValidJwtToken(tokenStr, h.props.JWT.Secret)
-	if err != nil {
-		log.Printf("")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	fmt.Println(claims)
-
-	fmt.Println(route)
-	fmt.Println(permission)
-	url := route.Host + permission.Route
-
-	fmt.Println(url)
-
-	proxyReq, err := http.NewRequest(permission.Method, url, r.Body)
+	// Creates the forward request
+	fwdUrl := route.Host + subRoute.Route + "?" + r.URL.RawQuery
+	log.Printf("Forward url: %s\n", fwdUrl)
+	fwd, err := http.NewRequest(subRoute.Method, fwdUrl, r.Body)
 	if err != nil {
 		log.Println(err.Error())
+		internal.HttpReply(w, http.StatusInternalServerError, &internal.APIResponse{
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
 	}
-	sub, err := claims.GetSubject()
-	if err != nil {
-		log.Println(err.Error())
+
+	if subRoute.Role != "NONE" {
+		// Check the bearer tokenStr
+		tokenStr, err := internal.GetBearerToken(r)
+		if err != nil {
+			log.Println("could not found the Bearer token in Headers")
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: "could not found the Bearer token in Headers",
+				Data:    nil,
+			})
+			return
+		}
+		// Check fi the bearer token is active
+		tokens, err := h.tokenRepo.GetByToken(tokenStr)
+		if err != nil || len(tokens) == 0 {
+			log.Printf("could not found the Bearer token %s", tokenStr)
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: fmt.Sprintf("could not found the Bearer token %s", tokenStr),
+				Data:    nil,
+			})
+			return
+		}
+
+		claims, err := internal.ValidJwtToken(tokenStr, h.props.JWT.Secret)
+		if err != nil {
+			log.Printf(err.Error())
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: err.Error(),
+				Data:    nil,
+			})
+			return
+		}
+		sub, err := claims.GetSubject()
+		if err != nil {
+			log.Println(err.Error())
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: err.Error(),
+				Data:    nil,
+			})
+			return
+		}
+		aud, err := claims.GetAudience()
+		if err != nil {
+			log.Println(err.Error())
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: err.Error(),
+				Data:    nil,
+			})
+			return
+		}
+		if len(aud) != 0 {
+			fwd.Header.Add("X-Auth-Role", aud[0])
+		} else {
+			log.Printf("no aud for %s\n", sub)
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: fmt.Sprintf("no aud for %s\n", sub),
+				Data:    nil,
+			})
+			return
+		}
+		fwd.Header.Add("X-Auth-Username", sub)
 	}
-	// aud, err := claims.GetAudience()
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// }
-	proxyReq.Header.Add("X-Auth-Username", sub)
-	proxyReq.Header.Add("X-Auth-Role", "ADMIN")
-	proxyReq.Header.Add("X-Auth-Token", tokenStr)
+
 	for header, values := range r.Header {
 		for _, value := range values {
-			proxyReq.Header.Add(header, value)
+			fwd.Header.Add(header, value)
 		}
 	}
-	fmt.Println(proxyReq.URL)
-	client := &http.Client{}
-	proxyRes, err := client.Do(proxyReq)
-	defer proxyRes.Body.Close()
 
-	fmt.Print(proxyRes)
-	for header, values := range proxyRes.Header {
+	client := &http.Client{}
+	fwdRes, err := client.Do(fwd)
+
+	// ToDo: how to deal with connection refused - error 502 or 503
+	if err != nil {
+		log.Println(err.Error())
+		internal.HttpReply(w, 502, &internal.APIResponse{
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+	defer fwdRes.Body.Close()
+
+	for header, values := range fwdRes.Header {
 		for _, value := range values {
 			w.Header().Add(header, value)
 		}
 	}
-
-	w.WriteHeader(proxyRes.StatusCode)
-	io.Copy(w, proxyRes.Body)
-
+	w.WriteHeader(fwdRes.StatusCode)
+	io.Copy(w, fwdRes.Body)
 }
