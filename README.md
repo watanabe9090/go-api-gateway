@@ -19,9 +19,10 @@ You must install nodemon (npm package) `npm i -g nodemon` to be able to run with
 1. ⬜️ Implement password hashing with *bcrypt*
 1. ⬜️ Implement *Testcontainers* to be able to make integration tests with *PostgreSQL*
 1. ⬜️ Do the tests for tokens/repository.go 
-1. ⬜️ Implement password hashing 
 1. ⬜️ Implement the refresh token mechanism 
 1. ⬜️ Serach for security improvements
 1. ⬜️ Implement Prometheus for monitoring
-1. ⬜️ Implement a better logging tool
+1. ⬜️ Implement a better logging tool 
 1. ✅ Write short documentation
+1. ⬜️ Improve the forward route
+1. ⬜️ Improve documentation
