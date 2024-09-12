@@ -72,7 +72,7 @@ func (h *AuthHandler) HandleNewToken(w http.ResponseWriter, r *http.Request) {
 	/* ToDo: Implement the refresh token (not needed at the moment)
 	*  This will allow users to obtain a new token without re-authenticating
 	 */
-	token, err := internal.CreateJwtToken(acc.Username, acc.Role)
+	token, err := internal.CreateJwtToken(acc.Username, acc.Role, h.props.JWT.Secret)
 	if err != nil {
 		log.Println(err.Error())
 		internal.HttpReply(w, http.StatusInternalServerError, &internal.APIResponse{
