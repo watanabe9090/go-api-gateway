@@ -219,6 +219,14 @@ func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
+		if tokens[0].State == "INVALID" {
+			log.Println("token is invalid")
+			internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
+				Message: "token is invalid",
+				Data:    nil,
+			})
+			return
+		}
 
 		claims, err := internal.ValidJwtToken(tokenStr, h.props.JWT.Secret)
 		if err != nil {
