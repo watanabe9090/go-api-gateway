@@ -31,9 +31,9 @@ type JWT struct {
 }
 
 type APIRoute struct {
-	Prefix string               `yaml:"Prefix"`
-	Routes []APIRoutePermission `yaml:"Routes"`
-	Host   string               `yaml:"Host"`
+	Context string               `yaml:"Context"`
+	Routes  []APIRoutePermission `yaml:"Routes"`
+	Host    string               `yaml:"Host"`
 }
 
 type APIRoutePermission struct {

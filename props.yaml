@@ -12,7 +12,7 @@ DB:
   DBName: "cerberus"
 
 APIs:
-  - Prefix: "/tasks"
+  - Context: "/tasks"
     Host: "http://localhost:9090/api/v1"
     Routes: 
       - Route: "/tasks"

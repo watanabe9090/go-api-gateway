@@ -153,7 +153,7 @@ func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
 	// Find the right context in properties.yml
 	var route *internal.APIRoute
 	for _, value := range h.props.APIs {
-		if strings.HasPrefix(requestedContext, value.Prefix) {
+		if strings.HasPrefix(requestedContext, value.Context) {
 			route = &value
 			break
 		}
