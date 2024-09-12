@@ -148,7 +148,7 @@ func (h *AuthHandler) HandleInvalidateToken(w http.ResponseWriter, r *http.Reque
 
 func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
 	requestedContext := strings.Replace(r.URL.Path, "/api/v1", "", 1)
-	log.Printf("request being forward to: %s\n", requestedContext)
+	log.Printf("request being forward from: %s to: %s\n", r.RemoteAddr, requestedContext)
 
 	// Find the right context in properties.yml
 	var route *internal.APIRoute
@@ -186,7 +186,10 @@ func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Creates the forward request
-	fwdUrl := route.Host + subRoute.Route + "?" + r.URL.RawQuery
+	fwdUrl := route.Host + subRoute.Route
+	if r.URL.RawQuery != "" {
+		fwdUrl += "?" + r.URL.RawQuery
+	}
 	log.Printf("Forward url: %s\n", fwdUrl)
 	fwd, err := http.NewRequest(subRoute.Method, fwdUrl, r.Body)
 	if err != nil {
@@ -273,7 +276,7 @@ func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
 			fwd.Header.Add(header, value)
 		}
 	}
-
+	fwd.Header.Set("X-Forwarded-For", r.RemoteAddr)
 	client := &http.Client{}
 	fwdRes, err := client.Do(fwd)
 
