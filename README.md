@@ -15,7 +15,7 @@ You must install nodemon (npm package) `npm i -g nodemon` to be able to run with
         - `X-Auth-Role`, role, e.g **ADMIN** or **USER**
 
 
-## ToDo list
+## ToDo list for v0.1
 1. ⬜️ Implement password hashing with *bcrypt*
 1. ⬜️ Implement *Testcontainers* to be able to make integration tests with *PostgreSQL*
 1. ⬜️ Do the tests for tokens/repository.go 
