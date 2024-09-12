@@ -9,6 +9,7 @@ import (
 
 type Properties struct {
 	Server Server     `yaml:"Server"`
+	JWT    JWT        `yaml:"JWT"`
 	DB     DBProps    `yaml:"DB"`
 	APIs   []APIRoute `yaml:"APIs"`
 }
@@ -23,6 +24,10 @@ type DBProps struct {
 
 type Server struct {
 	Port uint `yaml:"Port"`
+}
+
+type JWT struct {
+	Secret string `yaml:"Secret"`
 }
 
 type APIRoute struct {

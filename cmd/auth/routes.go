@@ -72,7 +72,7 @@ func (h *AuthHandler) HandleNewToken(w http.ResponseWriter, r *http.Request) {
 	/* ToDo: Implement the refresh token (not needed at the moment)
 	*  This will allow users to obtain a new token without re-authenticating
 	 */
-	token, err := internal.CreateJwtToken(acc.Username, acc.Role)
+	token, err := internal.CreateJwtToken(acc.Username, acc.Role, h.props.JWT.Secret)
 	if err != nil {
 		log.Println(err.Error())
 		internal.HttpReply(w, http.StatusInternalServerError, &internal.APIResponse{
@@ -116,7 +116,7 @@ func (h *AuthHandler) HandleInvalidateToken(w http.ResponseWriter, r *http.Reque
 		})
 		return
 	}
-	claims, err := internal.ValidJwtToken(tokenStr)
+	claims, err := internal.ValidJwtToken(tokenStr, h.props.JWT.Secret)
 	if err != nil {
 		internal.HttpReply(w, http.StatusUnauthorized, &internal.APIResponse{
 			Message: "invalid JWT token",
@@ -201,7 +201,7 @@ func (h *AuthHandler) HandleForward(w http.ResponseWriter, r *http.Request) {
 	// token := tokenStr[0]
 	fmt.Println(tokenStr[0])
 
-	claims, err := internal.ValidJwtToken(tokenStr)
+	claims, err := internal.ValidJwtToken(tokenStr, h.props.JWT.Secret)
 	if err != nil {
 		log.Printf("")
 		w.WriteHeader(http.StatusUnauthorized)
