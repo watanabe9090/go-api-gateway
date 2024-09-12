@@ -5,7 +5,7 @@ dev:
 	nodemon -L --exec go run main.go props.yaml --signal SIGTERM
 
 test:
-	go test
+	go test ./... -cover -v
 
 run: 
 	go run main.go props.yaml
