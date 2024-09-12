@@ -1,6 +1,9 @@
 Server:
   Port: 8999
 
+JWT:
+  Secret: "a-super-secret-key"
+
 DB:
   Host: "localhost"
   User: "postgres"
