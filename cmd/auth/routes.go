@@ -9,9 +9,18 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/watanabe9090/cerberus/cmd/accounts"
 	"github.com/watanabe9090/cerberus/cmd/tokens"
 	"github.com/watanabe9090/cerberus/internal"
+)
+
+var (
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "myapp_processed_ops_total",
+		Help: "The total number of processed events",
+	})
 )
 
 type AuthHandler struct {
@@ -30,7 +39,6 @@ func NewAuthHandler(db *sql.DB, props *internal.Properties) *AuthHandler {
 	tokenRepo := tokens.NewTokensRepository(db)
 	accRepo.InitUsersTable()
 	tokenRepo.InitTokenTable()
-
 	return &AuthHandler{
 		accRepo:   accRepo,
 		tokenRepo: tokenRepo,
@@ -39,6 +47,7 @@ func NewAuthHandler(db *sql.DB, props *internal.Properties) *AuthHandler {
 }
 
 func (h *AuthHandler) HandleNewToken(w http.ResponseWriter, r *http.Request) {
+	opsProcessed.Inc()
 	var body DTONewToken
 	json.NewDecoder(r.Body).Decode(&body)
 

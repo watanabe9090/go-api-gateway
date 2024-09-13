@@ -61,3 +61,7 @@ Content-Type: application/json
 ### Forward - Random route, should return 404
 GET  {{url}}/another-route
 Authorization: Bearer {{token}}
+
+
+### Prometheus metrics
+GET {{url}}/metrics
