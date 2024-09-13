@@ -25,6 +25,12 @@ func main() {
 	mux.HandleFunc("POST /api/v1/auth/token", authHand.HandleNewToken)
 	mux.HandleFunc("POST /api/v1/auth/invalidate", authHand.HandleInvalidateToken)
 	mux.HandleFunc("/api/v1/", authHand.HandleForward)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		internal.HttpReply(w, http.StatusNotFound, &internal.APIResponse{
+			Message: fmt.Sprintf("could not found the route %s", r.URL.String()),
+			Data:    nil,
+		})
+	})
 	fmt.Printf("Server running on port %d\n", props.Server.Port)
 	err = http.ListenAndServe(fmt.Sprintf(":%d", props.Server.Port), mux)
 	if err != nil {
