@@ -1,10 +1,11 @@
 ### Vars
-@url = http://localhost:8999/api/v1
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJVU0VSIiwiZXhwIjoxNzI2MDc0Nzg0LCJpYXQiOjE3MjYwNzExODQsImlzcyI6ImZvcnRyZXNzIiwic3ViIjoiZm9vYmFyIn0._hw3T4BQX7HP8ggzsVnm-E3B6Fw4Gz8jom4gtW8w_hA
+@url = http://localhost:8999
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjE1MDMwMywiaWF0IjoxNzI2MTQ2NzAzLCJpc3MiOiJnby1hcGktZ2F0ZXdheSIsInN1YiI6ImZvb2JhciJ9.xpv4_9yL1ecucKUg3frMwFqG-GqVZwLUTiyZjcZ9IHc
+
 
 
 ### Request token
-POST {{url}}/auth/token
+POST {{url}}/api/v1/auth/token
 Content-Type: application/json
 
 {
@@ -13,45 +14,50 @@ Content-Type: application/json
 }
 
 ### Invalidates the jwt token
-POST {{url}}/auth/invalidate
+POST {{url}}/api/v1/auth/invalidate
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 
 
-### Forward
-GET {{url}}/tasks
+### Forward - Get Tasks
+GET {{url}}/api/v1/tasks?size=90000&sort=name
 Authorization: Bearer {{token}}
 
 
 
-### Forward
-POST {{url}}/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjAxODcxNywiaWF0IjoxNzI2MDE1MTE3LCJpc3MiOiJmb3J0cmVzcyIsInN1YiI6Inl1cmkifQ.VKD1Imw51hNTluBb9uMqwBXrPdTdYJ36XYu2btaI-AQ
+### Forward - Save Tasks, by using: https://github.com/watanabe9090/java-api-tasks
+POST {{url}}/api/v1/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "Task n1",
-    "content": "123"
+    "name": "A simple task",
+    "content": "Lorem Ipusum"
 }
 
-### Forward
-PUT {{url}}/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjAxODcxNywiaWF0IjoxNzI2MDE1MTE3LCJpc3MiOiJmb3J0cmVzcyIsInN1YiI6Inl1cmkifQ.VKD1Imw51hNTluBb9uMqwBXrPdTdYJ36XYu2btaI-AQ
+### Forward - Update Tasks, by using: https://github.com/watanabe9090/java-api-tasks
+PUT {{url}}/api/v1/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "id": 61,
-    "name": "Task n60",
-    "content": "123"
+    "id": 1,
+    "name": "Not just a simple task",
+    "content": "Ipusum Lorem"
 }
 
 
-### Forward
-DELETE  {{url}}/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBRE1JTiIsImV4cCI6MTcyNjAxODcxNywiaWF0IjoxNzI2MDE1MTE3LCJpc3MiOiJmb3J0cmVzcyIsInN1YiI6Inl1cmkifQ.VKD1Imw51hNTluBb9uMqwBXrPdTdYJ36XYu2btaI-AQ
+### Forward - Delete Tasks, by using: https://github.com/watanabe9090/java-api-tasks
+DELETE  {{url}}/api/v1/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "id": 61
+    "id": 4
 }
+
+
+### Forward - Random route, should return 404
+GET  {{url}}/another-route
+Authorization: Bearer {{token}}
